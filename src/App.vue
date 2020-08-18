@@ -1,29 +1,34 @@
+<script src="https://npmcdn.com/vue@2.0.1/dist/vue.js"></script>
+<script src="https://npmcdn.com/vue-router@2.0.0/dist/vue-router.js"></script>
 <template>
   <div id="app">
     <header>
       <nav>
           <ul>
             <li class="nav-item">
-              <img class="logo" src="./assets/build-a-bot-logo.png"/>
+              <route-link class="nav-link" :to="{name: 'Home'}" exact>
+                <img class="logo" src="./assets/build-a-bot-logo.png"/>
               Build-a-bot
+              </route-link>
+            </li>
+            <li class="nav-item">
+              <route-link class="nav-link" :to="{name: 'Build'}" exact>
+                Build
+              </route-link>
             </li>
           </ul>
       </nav>
     </header>
     <main>
-      <RobotBuilder />
+      <router-view />
     </main>
   </div>
 </template>
 
 <script>
-import RobotBuilder from './build/RobotBuilder.vue';
 
 export default {
   name: 'App',
-  components: {
-    RobotBuilder,
-  },
 };
 </script>
 
@@ -63,5 +68,9 @@ ul {
 .logo {
   vertical-align: middle;
   height: 30px;
+}
+.nav-link {
+  text-decoration: none;
+  color: inherit;
 }
 </style>
