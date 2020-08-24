@@ -50,6 +50,7 @@ background-attachment: fixed;
 }
 main {
   padding: 30px;
+  float: right;
   background-color: white;
   width: 964px;
   min-height: 300px;
@@ -84,6 +85,7 @@ ul {
 }
 .aside {
   padding: 30px;
+  float: left;
   background-color: #aaa;
   width: 100px;
   min-height: 300px;
