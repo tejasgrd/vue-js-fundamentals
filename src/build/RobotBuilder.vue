@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 <template>
   <div class="content">
     <div class="preview">
@@ -80,10 +81,20 @@ import CollapsibleSection from '../shared/CollapsibleSection.vue';
 
 export default {
   name: 'RobotBuilder',
+  beforeRouteLeave(to, from, next) {
+    if (this.addedToCart) {
+      next(true);
+    } else {
+      // eslint-disable-next-line no-restricted-globals
+      const resposne = confirm('you have not added your robot to car, are you sure you want to leave?');
+      next(resposne);
+    }
+  },
   components: { PartSelector, CollapsibleSection },
   data() {
     return {
       availableParts,
+      addedToCart: false,
       cart: [],
       selectedRobots: {
         head: {},
@@ -112,6 +123,7 @@ export default {
       const cost = robot.head.cost + robot.leftArm.cost
       + robot.rightArm.cost + robot.torsos.cost + robot.bases.cost;
       this.cart.push({ ...robot, cost });
+      this.addToCart = true;
     },
   },
 };
