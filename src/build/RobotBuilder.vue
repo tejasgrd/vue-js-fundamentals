@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 <template>
-  <div class="content">
+  <div v-if="availableParts" class="content">
     <div class="preview">
       <CollapsibleSection>
         <div class="preview-content">
@@ -24,7 +24,7 @@
     <div class="top-row">
         <!-- <div class="robot-name">
           {{selectedRobots.head.title}}
-          <span v-if="selectedRobots.head.onSale" class="sale">
+          <span v-if="selectedRobots. " class="sale">
             Sale !
           </span>
         </div>-->
@@ -74,13 +74,15 @@
 </template>
 
 <script>
-import availableParts from '../data/parts';
 import createdHookMixin from './created-hook.mixin';
 import PartSelector from './PartSelector.vue';
 import CollapsibleSection from '../shared/CollapsibleSection.vue';
 
 export default {
   name: 'RobotBuilder',
+  created() {
+    this.$store.dispatch('robots/getParts');
+  },
   beforeRouteLeave(to, from, next) {
     if (this.addedToCart) {
       next(true);
@@ -93,7 +95,6 @@ export default {
   components: { PartSelector, CollapsibleSection },
   data() {
     return {
-      availableParts,
       addedToCart: false,
       cart: [],
       selectedRobots: {
@@ -107,6 +108,9 @@ export default {
   },
   mixins: [createdHookMixin],
   computed: {
+    availableParts() {
+      return this.$store.state.robots.parts;
+    },
     saleBorderClass() {
       return this.selectedRobots.head.onSale ? 'sale-border' : '';
     },
@@ -122,7 +126,9 @@ export default {
       const robot = this.selectedRobots;
       const cost = robot.head.cost + robot.leftArm.cost
       + robot.rightArm.cost + robot.torsos.cost + robot.bases.cost;
-      this.cart.push({ ...robot, cost });
+      this.$store.dispatch('robots/addRobotTocart', { ...robot, cost })
+        .then(() => this.$router.push('/cart'));
+      // this.cart.push({ ...robot, cost });
       this.addToCart = true;
     },
   },

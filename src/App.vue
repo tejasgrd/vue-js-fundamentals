@@ -2,6 +2,14 @@
 <script src="https://npmcdn.com/vue-router@2.0.0/dist/vue-router.js"></script>
 <template>
   <div id="app">
+    Root Foo  : {{rootFoo}} <br/>
+    Robots Foo  : {{robotsFoo}} <br/>
+    Users Foo  : {{usersFoo}} <br/>
+    <br/>
+    RootGetters Foo  : {{rootGetterFoo}} <br/>
+    RobotsGetters Foo  : {{robotsGetterFoo}} <br/>
+    UsersGetters Foo  : {{usersGetterFoo}} <br/>
+
     <header>
       <nav>
           <ul>
@@ -15,6 +23,14 @@
               <router-link class="nav-link" :to="{name: 'Build'}" exact>
                 Build
               </router-link>
+            </li>
+            <li class="nav-item cart">
+              <router-link class="nav-link" to="/cart" exact>
+                Cart
+              </router-link>
+              <div class=" ">
+                {{cart.length}}
+              </div>
             </li>
           </ul>
       </nav>
@@ -34,6 +50,29 @@
 
 export default {
   name: 'App',
+  computed: {
+    rootFoo() {
+      return this.$store.state.foo;
+    },
+    robotsFoo() {
+      return this.$store.state.robots.foo;
+    },
+    usersFoo() {
+      return this.$store.state.users.foo;
+    },
+    rootGetterFoo(){
+      return this.$store.getters.foo;
+    },
+    robotsGetterFoo(){
+      this.$store.getters['robots/foo'];
+    },
+    usersGetterFoo(){
+      this.$store.getters['users/foo'];
+    },
+    cart(){
+      return this.$store.state.robots.cart;
+    }
+  }
 };
 </script>
 
@@ -64,6 +103,11 @@ ul {
   padding: 3px;
   display: flex;
 }
+.nav-item.cart {
+  position: relative;
+  margin-left: auto;
+  border-right: none;
+}
 .nav-item {
   display: inline-block;
   padding: 5px 10px;
@@ -89,5 +133,16 @@ ul {
   background-color: #aaa;
   width: 100px;
   min-height: 300px;
+}
+.cart-items {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  font-size: 18px;
+  widows: 20px;
+  text-align: center;
+  display: inline-block;
+  border-radius: 100px;
+  background-color: mediumseagreen;
 }
 </style>
