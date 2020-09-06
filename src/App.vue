@@ -2,13 +2,13 @@
 <script src="https://npmcdn.com/vue-router@2.0.0/dist/vue-router.js"></script>
 <template>
   <div id="app">
-    Root Foo  : {{rootFoo}} <br/>
+    <!-- Root Foo  : {{rootFoo}} <br/>
     Robots Foo  : {{robotsFoo}} <br/>
     Users Foo  : {{usersFoo}} <br/>
     <br/>
     RootGetters Foo  : {{rootGetterFoo}} <br/>
     RobotsGetters Foo  : {{robotsGetterFoo}} <br/>
-    UsersGetters Foo  : {{usersGetterFoo}} <br/>
+    UsersGetters Foo  : {{usersGetterFoo}} <br/> -->
 
     <header>
       <nav>
@@ -47,28 +47,35 @@
 </template>
 
 <script>
-
+import { mapState, mapGetters } from 'vuex';
 export default {
   name: 'App',
   computed: {
-    rootFoo() {
-      return this.$store.state.foo;
-    },
-    robotsFoo() {
-      return this.$store.state.robots.foo;
-    },
-    usersFoo() {
-      return this.$store.state.users.foo;
-    },
-    rootGetterFoo(){
-      return this.$store.getters.foo;
-    },
-    robotsGetterFoo(){
-      this.$store.getters['robots/foo'];
-    },
-    usersGetterFoo(){
-      this.$store.getters['users/foo'];
-    },
+    ...mapState({ rootFoo: 'foo',
+    usersFoo: state => state.users.foo,
+    }),
+    // another way to do it
+    ...mapState('robots', {robotsFoo: 'foo'}),
+    // rootFoo() {
+    //   return this.$store.state.foo;
+    // },
+    // robotsFoo() {
+    //   return this.$store.state.robots.foo;
+    // },
+    // usersFoo() {
+    //   return this.$store.state.users.foo;
+    // },
+    ...mapGetters({rootGetterFoo: 'foo'}),
+    ...mapGetters('robots', { robotsGetterFoo: 'foo'}),
+    // rootGetterFoo(){
+    //   return this.$store.getters.foo;
+    // },
+    // robotsGetterFoo(){
+    //   this.$store.getters['robots/foo'];
+    // },
+    // usersGetterFoo(){
+    //   this.$store.getters['users/foo'];
+    // },
     cart(){
       return this.$store.state.robots.cart;
     }
