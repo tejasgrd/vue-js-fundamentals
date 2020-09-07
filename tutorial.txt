@@ -1,0 +1,1174 @@
+Vue CLI
+
+Vue instance -> new vue() only one for app
+Vue instance has App component and app component has other child component
+with router  APp instance has Router-view which changes components inside it
+
+Install NodeJS
+
+ npm install -g @vue/cli
+
+ vue create build-a-bot
+
+ main.js -> entry point   
+
+ new Vue({
+  render: (h) => h(App),
+}).$mount('#app');
+
+
+App.js 
+has 3 sections templare , script , style
+created HelloWorld component and added to App component
+this component has all html
+
+#Replacing defaults 
+rename HelloWorld -> HomePage.vue
+import HomePage from './components/HomePage.vue';
+
+export default {
+  name: 'App',
+  components: {
+    HomePage,
+  },
+};
+
+in App.vue chanes are done
+
+#Creating Vue.js COmponents and Using Templates Syntax
+ Agenda
+	 Creating COmponsnts
+	 bindings
+	 v-if and v-show
+	 v-for
+	 styling components
+	 coponent lifecycles hooks
+	 mixins
+
+Golobal Vs Single File components
+
+
+New Componnent from Scratch
+new page -> new component
+new folder -> home , build
+
+RobotBuilder.vue
+All HTML inside <templet> and css inside <styles> are copied from github repo
+RobotBuilder.vue path is added to App.vue
+
+Bindig it to Data
+
+Need Data so create data folder
+Now parts.js has hardcoaded data
+images are hardcodedin templet but we need to bind it to data
+
+# v-bind:src="availableParts.heads[0].src"  
+
+on CLick Listner 
+
+#*v-on:click="slectNextHead()"
+
+all the Methods are defined in 
+
+methods: {
+	
+}
+
+
+getImgUrl() is defined in methods: {}
+
+
+helper functions at top of index 
+
+ Shorcuts 
+ for v-bind:src we can use :src
+ for v-on:click we can use @click
+
+create and bind to computed properties
+
+computed: {} contains methods 
+
+Now we can use methods from computed section to return objectds on v-bind
+
+My Note : computed methods should be treated as properties in actual calling
+
+Interpolation 
+
+{{ }}  is used to put expression
+
+v-once - evaluated only once so in above it will not update
+
+
+# Dynamially show and Hide content on page
+
+conditional 
+
+* v-if and v-show
+
+v-if="selectedRobots.head.onSale"  // should be boolean expression
+v-show="selectedRobots.head.onSale" // with v-show inline styling as hidden
+
+* v-for
+
+Repeting data
+
+New method addToCart
+
+intialize cart: [] in data , make sure to initialize it with empty array otherwise Vue wont recognize change in data
+
+
+Styles
+
+<style scoped> for this component
+
+styles can also be applied to child component from parent component
+
+But TO style html element inside child elemet we need deep selector
+
+
+# .content >>> .robot-name   // this will affect all elements
+
+
+Conditionally applying styles
+
+
+:styles="{ border: '3px solid rd'}">   // inside HTML element
+
+for applyig above conditinally
+
+<div class="top part" :style="headBorderStyle">
+inside computed
+
+headBorderStyle() {
+      return {
+        border: this.selectedRobots.head.onSale ? '3px solid rd' : '3px solid #aaa',
+      };
+    },
+
+
+COnditionally applying Classes
+
+<div class="top part" :class="{'sale-border': selectedRobots.head.onSale}">
+        <div class="robot-name">
+
+
+SASS and other pre processors
+
+$ npm install node-sass sass-loader --save-dev
+
+Lifecycle hooks
+function as below
+created() { 
+	console.log(" component created");
+}
+Check Documentation 
+
+# Mixins 
+Mixins are way to share functionality accross components
+Create a file with mixins funcitons and add it here as mixin property
+mixins: [createdHookMixin],
+
+
+
+# Enebaling intercomponent communocations
+
+Using props to share data with child components
+Validating component props
+Passing data to parent component with events
+Injectiig content in child components with slots
+
+
+Create Child component
+
+In parent component add 
+components: { PartSelector},
+
+PartsSelector child component needs to receive list of parts  from its parent component
+
+To pass property to child components
+for this we need to add props to components 
+
+<PartSelector :parts="availableParts.arms" />
+
+props: ['parts'],
+
+computed: {
+    selectedPart() {
+      return this.parts[this.selectedPartIndex];
+    },
+  },
+
+Now :parts is binding 
+
+
+For Styling purpose position of ech button we need position property ,
+position is not binding like :parts hence no semi colon
+
+ <PartSelector
+      :parts="availableParts.bases"
+      position="bottom" /> 
+
+ so in child component 
+props: ['parts', 'position'],
+ <div class="part" :class="position">
+
+
+Now Parts and postion properties are passed to child component without any validation
+
+ex: parts should be arry and position to be String 
+props: {
+    parts: {
+      type: Array,
+      required: true,
+    },
+    position: {
+      type: String,
+      required: true,
+      validator(value) {
+        return ['right', 'left', 'top', 'bottom', 'center'].includes(value);
+      },
+    },
+  },
+
+
+# PAssing Data Back to Parent Component ffrom Child Component
+
+
+Events in child component that the parent component can bind to 
+
+Each view component has emmit function available that we can to emit an event
+
+when we emit the event we also want a data to be with it 
+
+Below is emit mwthod for that
+
+computed: {
+    selectedPart() {
+      return this.parts[this.selectedPartIndex];
+    },
+  },
+  methods: {
+    selectNextPart() {
+      this.selectedPartIndex = getNextValidIndex(
+        this.selectedPartIndex,
+        this.parts.length,
+      );
+      this.$emit('partSelected', this.selectedPart);
+    },
+    selectPreviousPart() {
+      this.selectedPartIndex = getPreviousValidIndex(
+        this.selectedPartIndex,
+        this.parts.length,
+      );
+      this.$emit('partSelected', this.selectedPart);
+    },
+
+Now we need to bind it to the parent component
+
+use v-on or @ in parent component to bind to child component and then bind it to 
+method on component
+
+or just handle it to inline buind function
+
+<PartSelector
+        :parts="availableParts.heads"
+        position="top"
+        @partSelected="part => selectedRobots.head = part " />
+
+
+But After this cart can add but there is problem 
+on First initialization of page the @partSelected is not invoked hence
+no part can be added to cart . So we will use component lifecycle methods tosolve this problem
+
+In created lifecycle hook we are emiting selected part
+
+computed: {
+    selectedPart() {
+      return this.parts[this.selectedPartIndex];
+    },
+  },
+  created() {
+    this.emitSelectedPart();
+  },
+  methods: {
+    emitSelectedPart() {
+      this.$emit('partSelected', this.selectedPart);
+    },
+
+Just like created() invoked when component is created updated() lifecycle hook invokes
+when components is updated
+
+so if we use updated() we dont have to emit it during selected index change
+
+so we can saftly remove form it 
+
+
+
+# Inject HTML of vue content into component
+
+
+TO Inbject HTML in CollapsibleSection <!-- Toggable Content -->
+we use <slot> 
+
+
+
+
+# Routing from Page to Page
+
+Add routing to app
+Linking to routed pages
+Sttling links based on the active routs
+Navigating from code
+Working with route params
+using nested routes
+using named views
+enabling HTML5 History Mode
+Preventing navigation with navigation guards
+
+
+#  Add routing to app
+
+install routing 
+npm install vue-router
+import Vue from 'vue';
+index.js 
+import Vue from 'vue';
+import Router from 'vue-router';
+import HomePage from '../home/HomePage.vue';
+
+Vue.use(Router);
+export default new Router({
+  routes: [{
+    path: '/',
+    name: 'Home',
+    component: HomePage,
+  }],
+});
+
+Now this routes need to be used in main js
+Remove components from App.vue and replace it 
+with <route-view />
+
+ Lining to routed pages
+Use route-link
+
+<route-link to="/build">Get Started</route-link > Building your first robot!
+
+OR
+<route-link class="nav-link" :to="{name: 'Home'}" >
+
+Styling links based on the active routs
+
+exact attribute to router-link for css
+
+class name -> router-link-active
+
+active-class="new-class-name"
+
+
+
+Navigating from code
+
+router available is at this.$router 
+
+this.$router.push('/parts');
+
+
+Roter params 
+
+ Modify Route to 
+ {
+    path: '/parts/:routeType/:id',
+    name: 'Parts',
+    component: PartInfo,
+  }
+
+   routes params availabe at 
+   conponents -> route property               
+
+Decoupling 
+
+Make props true and get those props in component 
+{
+    path: '/parts/:routeType/:id',
+    name: 'Parts',
+    component: PartInfo,
+    props: true
+  }
+Partinfo.vue
+export default {
+  name: 'PartInfo',
+  props: ['partType', 'id'],
+  computed: {
+    part() {
+      debugger;
+      const { partType, id } = this;//partType and id fron props
+      return parts[partType].find((part) => part.id === +id);
+    },
+  },
+};
+
+
+Nested Routes
+
+
+{
+    path: '/parts/browse',
+    name: 'BrowseParts',
+    component: BrowsParts,
+    children: [
+      {
+        name: 'BrowsHeads',
+        path: 'heads',
+        component: RobotHeads,
+      },
+      {
+        name: 'BrowsBases',
+        path: 'bases',
+        component: RobotBases,
+      },
+      {
+        name: 'BrowsArms',
+        path: 'arms',
+        component: RobotArms,
+      },
+      {
+        name: 'BrowsTorsos',
+        path: 'torsos',
+        component: RobotTorsos,
+      },
+    ],
+  },
+
+
+
+
+  Using Named Views
+in App.vue
+
+ <div class="container">
+      <aside class="aside">
+        <router-view name="sidebar"/>
+      </aside>
+      <main>
+        <router-view />
+      </main>
+    </div>
+
+  index.js
+
+  routes: [{
+    name: 'Home',
+    path: '/',
+    components: {
+      default: HomePage,
+      sidebar: SidebarStandard,
+    },
+  },
+  {
+    path: '/build',
+    name: 'Build',
+    components: {
+      default: RobotBuilder,
+      sidebar: SidebarBuild,
+    },
+  },
+
+
+  Enabling HTML5 History
+
+  export default new Router({
+  mode: 'history',
+  routes: [{
+    name: 'Home',
+
+
+
+    NOTE : when  Hostory mode is on note that server should always be returning index page on direct load of url
+
+
+Navigation Guards
+
+ROute Gurard 
+
+on OCmponent or On Route
+
+
+On Route
+{
+    path: '/parts/:routeType/:id',
+    name: 'Parts',
+    component: PartInfo,
+    props: true,
+    beforeEnter(to, from, next) {
+      const isValidId = Number.isInteger(Number(to.params.id));
+      next(isValidId);
+    },
+
+
+On Component
+
+
+export default {
+  name: 'RobotBuilder',
+  beforeRouteLeave(to, from, next) {
+    if (this.addedToCart) {
+      next(true);
+    } else {
+      // eslint-disable-next-line no-restricted-globals
+      const resposne = confirm('you have not added your robot to car, are you sure you want to leave?');
+      next(resposne);
+    }
+  },
+  components: { PartSelector, CollapsibleSection },
+  data() {
+    return {
+      availableParts,
+      addedToCart: false,
+
+
+# Important
+# Managing State and Server Communication with Vuex
+
+Vuex Store 
+
+State 
+  Its shared state object which keels all if the data
+  entire app.
+
+Mutations
+  are Synchronus (ulike actions which are async)
+
+
+Actions ,
+  if you want to change data for ex by calling api 
+  thats where actions come in
+
+Actions and Mutations works hand in hand to make 
+calls and then mutate the state
+
+Getters 
+  Get data from state and do some sort of calculations on 
+  data before returning it
+
+
+
+#Creating Vuex store
+
+$ npm install vuex --save
+
+# Add data in store using mutation
+
+Add data of add to cart in Store so that it can be 
+accessed by 
+
+All the data change happens to store must happens through
+mutaion
+
+store/index.js
+export default new Vuex.Store({
+  state: {
+    cart: [],
+  },
+  mutations: {
+    addRobotToCart(state, robot) {
+      state.cart.push(robot);
+    },
+  },
+});
+
+now call this method from RobotBuilder.vue
+
+#Retrive cart data from store
+
+New Component Shopping
+
+Vuex getters
+
+Componentr
+
+computed: {
+    cart() {
+      return this.$store.state.robots.cart;
+    },
+    cartSaleItems() {
+      return this.$state.getters.cartSaleItems;
+    },
+  },
+
+
+
+  Inside store 
+
+  getters: {
+    cartSaleItems(state) {
+      return state.cart.filter((item) => item.head.onSale);
+    },
+  },
+
+
+
+# HTTP calls Using Vuex Actions
+ 
+
+ Created sertver to serve JSON robots part data 
+
+create Actions in Store
+
+actions: {
+    getParts({state, getters, commit, dispatch}) {
+
+    },
+  },
+
+
+{state, getters, commit, dispatch} -> Contex Object but we need only commit out of it
+
+
+Now we need HTTP call , vue doest provide any method for that so we will use axios
+
+$ npm install axios --save
+
+but for axios accessing different port 
+
+we need built in proxy 
+
+and we provide relative url to axios
+
+
+create vue.config.js -> root level for proxy
+
+
+module.exports = {
+  devServer: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigine: true,
+      },
+    },
+  },
+};
+
+
+
+Now when get call complets we want to add data to our store
+
+
+Now to do that we can do it through mutations
+
+mu tations: {
+    addRobotToCart(state, robot) {
+      debugger;
+      state.cart.push(robot);
+    },
+    updatePart(state, parts) {
+      state.parts = parts;
+    },
+  }
+
+
+ actions: {
+    getParts({ commit }) {
+      axios.get('/api/parts')
+        .then((result) => commit('updatePart', result.data))
+        .catch(console.log);
+    },
+  },
+
+  So now whereever we need this data we need to dispatch this action in this case RobootBuilder.vue
+
+  Now we need to dispatch actions as soon as the compoent created
+  so we need created() hook  
+  created() {
+    this.$store.dispatch('getParts');
+  },
+
+  and we need computed property that will return call from store when axios call is over
+
+
+computed: {
+    availableParts() {
+      return this.$sote.state.parts;
+    },
+
+
+this will be update parts when get action is over 
+
+note : :parts="availableParts.heads" will get from computed property (it was previously defined in data())
+
+
+But there is error in Store we have defined parts as null
+
+state: {
+    cart: [],
+    parts: null,
+  },
+
+and this will get called when page loads and before data is fetched so value is null at that time and it will trwo error
+2 solutions
+
+1. provide default value
+2. call only when data is available
+
+will use 2nd 
+
+use v-if="availableParts"
+
+
+
+Now we need to do same in all files in parts folder
+
+Mixin can be used for common code 
+
+
+Now to use this mixin file get-parts-mixins.js
+Use it like this
+<script>
+ 
+
+export default {
+  name: 'RobotBases',
+  mixins: [getPartsMixin],
+};
+</script>
+
+
+#Actions tp Save data
+RobotBuilder. vue
+ addToCart() {
+      debugger;
+      const robot = this.selectedRobots;
+      const cost = robot.head.cost + robot.leftArm.cost
+      + robot.rightArm.cost + robot.torsos.cost + robot.bases.cost;
+      this.$store.dispatch('addRobotTocart', { ...robot, cost });
+      // this.cart.push({ ...robot, cost });
+      this.addToCart = true;
+    },
+
+Store Index.js
+
+actions: {
+    getParts({ commit }) {
+      axios.get('/api/parts')
+        .then((result) => commit('updatePart', result.data))
+        .catch(console.log);
+    },
+    addRobotTocart({ commit, state }, robot) {
+      const cart = [...state.cart, robot];
+      axios.post('/api/cart', cart)
+        .then(() => commit('addRobotToCart', robot))
+        .catch(console.log);
+    },
+  },
+
+
+
+
+Redirect to cart when POST calls complete
+
+
+ addToCart() {
+      debugger;
+      const robot = this.selectedRobots;
+      const cost = robot.head.cost + robot.leftArm.cost
+      + robot.rightArm.cost + robot.torsos.cost + robot.bases.cost;
+      this.$store.dispatch('addRobotTocart', { ...robot, cost })
+        .then(() => this.$router.push('/cart'));
+      // this.cart.push({ ...robot, cost });
+      this.addToCart = true;
+    },
+
+
+# Organizing Stores with Modules
+
+Robots Module and UsersModule 
+
+create js file robots.js inisde module 
+and paste all code there 
+import that in main file as below
+
+import Vue from 'vue';
+import Vuex from 'vuex';
+import robotsModule from './modules/robits';
+
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+  modules: {
+    robots: robotsModule,
+  },
+});
+
+
+Now to access values from it we need to 
+define this whereever we have defined $store
+
+Like app.vue 
+Notice robots matces with name of modules above
+export default {
+  name: 'App',
+  computed: {
+    cart(){
+      return this.$store.state.robots.robots.cart;
+    }
+  }
+};
+
+
+Both modules responds to dipatch actions as long as there is actions. 
+
+Fo ex:
+addToCart() {
+      debugger;
+      const robot = this.selectedRobots;
+      const cost = robot.head.cost + robot.leftArm.cost
+      + robot.rightArm.cost + robot.torsos.cost + robot.bases.cost;
+      this.$store.dispatch('addRobotTocart', { ...robot, cost })
+        .then(() => this.$router.push('/cart'));
+      // this.cart.push({ ...robot, cost });
+      this.addToCart = true;
+    },
+
+
+for above dispatch if ther is method
+'addRobotTocart' in user.js then it will get called
+
+Now to seperate this Names spaces modules are used
+
+then becomes 
+this.$store.dispatch('robots/addRobotTocart', { ...robot, cost })
+        .then(() => this.$router.push('/cart'));
+      // this.cart.push({ ...robot, cost });
+
+
+#Imp
+State on mudules always named sapced
+weather module is or not
+
+But mutatios actions and getter are only names spaced only if you named spaced it to true
+
+
+# Access NameSpaced getters
+Slightly different Syntax
+export default {
+  name: 'Cart',
+  computed: {
+    cart() {
+      return this.$store.state.robots.cart;
+    },
+    cartSaleItems() {
+      return this.$store.getters['robots/cartSaleItems'];
+    },
+  },
+};
+
+
+# GLobal and NamedState state
+
+
+
+getters has 3 variables ,
+EX:
+foo(state, getters, rootState){}
+
+in App.vue
+
+export default {
+  name: 'App',
+  computed: {
+    rootFoo() {
+      return this.$store.state.foo;
+    },
+    robotsFoo() {
+      return this.$store.state.robots.foo;
+    },
+    usersFoo() {
+      return this.$store.state.users.foo;
+    },
+    rootGetterFoo(){
+      return this.$store.getters.foo;
+    },
+    robotsGetterFoo(){
+      this.$store.getters['robots/foo'];
+    },
+    usersGetterFoo(){
+      this.$store.getters['users/foo'];
+    },
+    cart(){
+      return this.$store.state.robots.cart;
+    }
+  }
+};
+
+
+
+#MapState Helper
+
+IN abo ve there is too much boiler plate code
+Use    
+mapState 
+
+insted of abve properties we have mapState her for help
+
+ ...mpaState({ rootFoo: 'foo',
+    robotsFoo: state => state.robots.foo,
+    }),
+    // another way to do it
+    ...mapState('users', {usersFoo: 'foor'}),
+
+
+
+#MapGetters 
+For Getter properties
+...mapGetters({rootGetterFoo: 'foo'}),
+...mapGetters('robots', { robotsGetterFoo: 'foo'}),
+
+
+
+# mapActions (different syntax)
+in RobotBuilder.vue
+insted in computed  its in method section
+we need to map some actions 
+1. dispatch below action
+created() {
+    this.$store.dispatch('robots/getParts');
+  },
+2. this.$store.dispatch('robots/addRobotTocart', { ...robot, cost })
+
+...mapActiopns('robots', ['getParts', 'addRobotTocart']),
+
+
+
+this means that 
+'getParts ' and 'addRobotTocart'
+are methods in our class
+so we can call then
+
+Notice with above code we care not calling 
+'dispatch'  anywhere, this is taken care by
+mapActions 
+
+
+#mapMutaitons
+
+## Creating Custome Directives and Filters
+
+# Creating Custome Directives 
+
+Make directice 
+export default {
+  bind: (element) => {
+    element.style.position = 'absolute';
+    element.style.bottom = '5px';
+    element.style.right = '5px';
+  },
+};
+
+
+import in file 
+use it like this
+directives: { pin: pinDirective },
+
+and in HTMl its v-pin
+
+#passing data to directive
+
+++++++++++++++++TODO in code++++++++++++++++
+
+ 
+Just like bind 
+there is also hooks
+update 
+other hooks
+inserted
+componentUpdated -> after all child updated
+unbind
+
+++++++++++++++++TODO in code END++++++++++++++++
+bind and update shortHand
+
+# Make Directive available globally
+in App.vue
+import pinDirective from '../shared/pin-directive';
+Vue.directive('pin',pinDirective);
+
+
+
+# Creating custome Filters
+
+ Create JS function
+ export default function (amount) {
+  return `$${amount.toFixed(2)}`;
+}
+
+add it in ShopppingCart.vue
+add it to filter
+and use it like this
+
+filters: {
+    currency: currencyFilter,
+  },
+
+in html 
+<td class="cost">
+            {{robot.cost | currency}}
+          </td>
+
+or first arg is before pipe sign |
+rest are like below
+<td class="cost">
+            {{robot.cost | currency('₹')}}
+          </td>
+
+
+
+# Declear Filter globally
+
+main.js
+
+Vue.filter('currency',currencyFilter);
+
+after this no need to use it component with 
+import and filter: decleration, use it directly
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
